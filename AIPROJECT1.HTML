@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Tracker</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom scrollbar styling for a cleaner look */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #9ca3af; /* gray-400 */
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background-color: #f3f4f6; /* gray-100 */
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #4b5563; /* gray-600 */
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-track {
+            background-color: #1f2937; /* gray-800 */
+        }
+        /* Set default font to Inter */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+
+    <div id="app" class="min-h-screen flex flex-col items-center p-4 sm:p-6 lg:p-10">
+        
+        <!-- Header and Theme Toggle -->
+        <header class="w-full max-w-2xl flex justify-between items-center mb-8">
+            <h1 class="text-4xl font-extrabold text-blue-600 dark:text-blue-400">
+                Budget Flow
+            </h1>
+            <button id="theme-toggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition duration-200" title="Toggle dark mode">
+                <svg id="sun-icon" class="w-6 h-6 text-yellow-500 hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+                <svg id="moon-icon" class="w-6 h-6 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+            </button>
+        </header>
+
+        <div class="w-full max-w-2xl bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl space-y-8">
+
+            <!-- Balance Card -->
+            <div class="p-6 bg-blue-500 text-white rounded-lg shadow-xl">
+                <h2 class="text-lg font-medium opacity-80">Your Current Balance</h2>
+                <p id="balance" class="text-5xl font-extrabold mt-1">$0.00</p>
+            </div>
+
+            <!-- Transaction Form -->
+            <section>
+                <h2 class="text-2xl font-semibold mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">Add New Transaction</h2>
+                <form id="transaction-form" class="space-y-4">
+                    
+                    <div>
+                        <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                        <input type="text" id="description" placeholder="e.g., Monthly Salary" required
+                            class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 focus:ring-blue-500 focus:border-blue-500 transition duration-150">
+                    </div>
+                    
+                    <div>
+                        <label for="amount" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Amount ($)</label>
+                        <input type="number" id="amount" placeholder="e.g., 2000.00" step="0.01" required
+                            class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 focus:ring-blue-500 focus:border-blue-500 transition duration-150">
+                    </div>
+                    
+                    <div>
+                        <label for="type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
+                        <select id="type" required
+                            class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 focus:ring-blue-500 focus:border-blue-500 appearance-none transition duration-150">
+                            <option value="income">Income</option>
+                            <option value="expense">Expense</option>
+                        </select>
+                    </div>
+
+                    <button type="submit"
+                        class="w-full py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition duration-200 shadow-md shadow-blue-500/50">
+                        Record Transaction
+                    </button>
+                </form>
+            </section>
+
+            <!-- Transactions List -->
+            <section>
+                <h2 class="text-2xl font-semibold mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">History</h2>
+                <ul id="transaction-list" class="space-y-3 max-h-96 overflow-y-auto custom-scrollbar">
+                    <!-- Transactions will be inserted here -->
+                </ul>
+                <p id="empty-message" class="text-center text-gray-500 dark:text-gray-400 mt-4 hidden">No transactions recorded yet.</p>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- Custom Modal for Confirmation (instead of window.confirm) -->
+    <div id="custom-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-60 dark:bg-opacity-80 backdrop-blur-sm">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl max-w-sm w-full space-y-4">
+            <h3 id="modal-title" class="text-xl font-bold text-gray-900 dark:text-white">Confirm Deletion</h3>
+            <p id="modal-message" class="text-gray-700 dark:text-gray-300">Are you sure you want to permanently delete this transaction?</p>
+            <div class="flex justify-end space-x-3">
+                <button id="modal-cancel" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-150">Cancel</button>
+                <button id="modal-confirm" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition duration-150">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Global Variables and Constants ---
+        const LOCAL_STORAGE_KEY = 'budget-tracker-transactions';
+        let transactions = [];
+        
+        // --- DOM Elements ---
+        const balanceEl = document.getElementById('balance');
+        const listEl = document.getElementById('transaction-list');
+        const formEl = document.getElementById('transaction-form');
+        const emptyMessageEl = document.getElementById('empty-message');
+        const themeToggleEl = document.getElementById('theme-toggle');
+        const sunIcon = document.getElementById('sun-icon');
+        const moonIcon = document.getElementById('moon-icon');
+
+        const modalEl = document.getElementById('custom-modal');
+        const modalConfirmEl = document.getElementById('modal-confirm');
+        const modalCancelEl = document.getElementById('modal-cancel');
+        let modalResolve = null; // Used to handle the confirmation promise
+
+        // --- Utility Functions ---
+        
+        /**
+         * Formats a number as currency.
+         * @param {number} amount
+         * @returns {string} Formatted currency string.
+         */
+        const formatCurrency = (amount) => {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+            }).format(amount);
+        };
+
+        /**
+         * Saves the current transactions array to local storage.
+         */
+        const saveTransactions = () => {
+            try {
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(transactions));
+            } catch (e) {
+                console.error('Error saving to local storage:', e);
+            }
+        };
+
+        /**
+         * Custom Promise-based modal for confirmation (replaces window.confirm).
+         * @param {string} title 
+         * @param {string} message 
+         * @returns {Promise<boolean>}
+         */
+        const showConfirmationModal = (title, message) => {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+            
+            modalEl.classList.remove('hidden');
+            
+            return new Promise((resolve) => {
+                modalResolve = resolve;
+            });
+        };
+
+        const hideConfirmationModal = () => {
+            modalEl.classList.add('hidden');
+        }
+
+        // --- Core Logic ---
+
+        /**
+         * Updates the balance total and renders all transactions.
+         */
+        const updateDOM = () => {
+            // 1. Calculate Balance
+            const balance = transactions.reduce((acc, t) => acc + t.amount, 0);
+            balanceEl.textContent = formatCurrency(balance);
+
+            // 2. Clear and Render List
+            listEl.innerHTML = '';
+
+            if (transactions.length === 0) {
+                emptyMessageEl.classList.remove('hidden');
+                return;
+            }
+            emptyMessageEl.classList.add('hidden');
+
+            transactions.forEach(transaction => {
+                const isIncome = transaction.type === 'income';
+                const sign = isIncome ? '+' : '-';
+                const amountText = formatCurrency(Math.abs(transaction.amount));
+                
+                // Color classes
+                const textColor = isIncome ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+                const bgColor = isIncome ? 'bg-green-50 dark:bg-green-900/30' : 'bg-red-50 dark:bg-red-900/30';
+
+                const li = document.createElement('li');
+                li.className = `flex justify-between items-center p-4 rounded-xl shadow-md border-r-8 ${bgColor} transition duration-200 hover:shadow-lg`;
+                li.innerHTML = `
+                    <span class="text-lg font-medium dark:text-gray-50">${transaction.description}</span>
+                    <div class="flex items-center space-x-3">
+                        <span class="text-lg font-semibold ${textColor}">
+                            ${sign}${amountText}
+                        </span>
+                        <button data-id="${transaction.id}" 
+                            class="delete-btn p-1 rounded-full text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-150"
+                            title="Delete transaction">
+                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                        </button>
+                    </div>
+                `;
+                listEl.appendChild(li);
+            });
+
+            // Add event listeners to newly created delete buttons
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const id = e.currentTarget.getAttribute('data-id');
+                    handleDelete(id);
+                });
+            });
+        };
+
+        /**
+         * Handles form submission to add a new transaction.
+         * @param {Event} e 
+         */
+        const handleAddTransaction = (e) => {
+            e.preventDefault();
+
+            const description = document.getElementById('description').value.trim();
+            const amountStr = document.getElementById('amount').value;
+            const type = document.getElementById('type').value;
+
+            if (!description || !amountStr) {
+                return; // Basic validation
+            }
+
+            let amount = parseFloat(amountStr);
+            if (isNaN(amount) || amount <= 0) {
+                alert('Please enter a valid positive amount.');
+                return;
+            }
+
+            // Convert amount to negative if it's an expense
+            if (type === 'expense') {
+                amount = -Math.abs(amount);
+            } else {
+                amount = Math.abs(amount);
+            }
+            
+            const newTransaction = {
+                id: Date.now().toString() + Math.random().toString(16).slice(2), // Simple unique ID
+                description,
+                amount,
+                type
+            };
+
+            transactions.unshift(newTransaction); // Add to the start of the list
+            saveTransactions();
+            updateDOM();
+
+            // Reset form fields
+            formEl.reset();
+        };
+
+        /**
+         * Deletes a transaction by its ID.
+         * @param {string} id 
+         */
+        const handleDelete = async (id) => {
+            const confirmed = await showConfirmationModal('Delete Transaction', 'Are you sure you want to permanently delete this transaction? This action cannot be undone.');
+
+            if (confirmed) {
+                transactions = transactions.filter(t => t.id !== id);
+                saveTransactions();
+                updateDOM();
+            }
+        };
+
+        /**
+         * Initializes the application by loading data and setting up listeners.
+         */
+        const init = () => {
+            // Load transactions from localStorage
+            try {
+                const storedTransactions = localStorage.getItem(LOCAL_STORAGE_KEY);
+                if (storedTransactions) {
+                    transactions = JSON.parse(storedTransactions);
+                }
+            } catch (e) {
+                console.error('Failed to parse stored transactions:', e);
+                transactions = [];
+            }
+            
+            updateDOM(); // Render initial state
+
+            // Set up form submission listener
+            formEl.addEventListener('submit', handleAddTransaction);
+
+            // Set up theme logic
+            const isDark = localStorage.getItem('theme') === 'dark' || 
+                           (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+            } else {
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+            }
+
+            themeToggleEl.addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+                const isDarkMode = document.documentElement.classList.contains('dark');
+                localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+
+                // Toggle icons
+                sunIcon.classList.toggle('hidden', !isDarkMode);
+                moonIcon.classList.toggle('hidden', isDarkMode);
+            });
+
+            // Set up modal listeners
+            modalConfirmEl.onclick = () => {
+                if (modalResolve) modalResolve(true);
+                hideConfirmationModal();
+            };
+            modalCancelEl.onclick = () => {
+                if (modalResolve) modalResolve(false);
+                hideConfirmationModal();
+            };
+            modalEl.onclick = (e) => {
+                if (e.target.id === 'custom-modal') {
+                    if (modalResolve) modalResolve(false);
+                    hideConfirmationModal();
+                }
+            };
+        };
+
+        // Start the application when the window loads
+        window.onload = init;
+    </script>
+</body>
+</html>
